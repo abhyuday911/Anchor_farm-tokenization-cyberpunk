@@ -42,6 +42,7 @@ next-env.d.ts
 
 # Anchor
 /anchor/.anchor
+/anchor/programs/escrow
 /anchor/target
 test-ledger
 **/*.rs.bk
