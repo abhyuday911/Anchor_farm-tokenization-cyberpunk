@@ -1,0 +1,74 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token::{Mint, Token, TokenAccount};
+
+pub use crate::states::Farm;
+#[derive(Accounts)]
+pub struct InitializeFarm<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
+
+    #[account(
+        init,
+        seeds = [b"farm", owner.key().as_ref()],
+        bump,
+        payer = owner,
+        space = 8 + Farm::INIT_SPACE,
+    )]
+    pub farm: Account<'info, Farm>,
+
+    // frontend-created mint
+    pub farm_token_mint: Account<'info, Mint>,
+
+    #[account(
+        init,
+        seeds = [b"farm-signer", farm.key().as_ref()],
+        bump,
+        payer = owner,
+        space = 8
+    )]
+    /// CHECK: PDA signer
+    pub farm_signer: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        token::mint = farm_token_mint,
+        token::authority = farm_signer,
+        seeds = [b"payment-vault", farm.key().as_ref()],
+        bump,
+        payer = owner
+    )]
+    pub farm_payment_vault: Account<'info, TokenAccount>,
+
+    #[account(
+        init,
+        token::mint = farm_token_mint,
+        token::authority = farm_signer,
+        seeds = [b"revenue-vault", farm.key().as_ref()],
+        bump,
+        payer = owner
+    )]
+    pub farm_revenue_vault: Account<'info, TokenAccount>,
+
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
+}
+
+pub fn initialize_farm(ctx: Context<InitializeFarm>, total_shares: u64) -> Result<()> {
+    let farm = &mut ctx.accounts.farm;
+    farm.owner = *ctx.accounts.owner.key;
+    farm.farm_token_mint = ctx.accounts.farm_token_mint.key();
+
+    farm.farm_payment_vault = ctx.accounts.farm_payment_vault.key();
+    farm.farm_revenue_vault = ctx.accounts.farm_revenue_vault.key();
+
+    farm.total_shares = total_shares;
+    farm.minted_shares = 0;
+
+    farm.account_revenue_per_share = 0;
+    farm.bump = ctx.bumps.farm;
+    farm.signer_bump = ctx.bumps.farm_signer;
+
+
+    Ok(())
+}
