@@ -8,7 +8,7 @@ pub struct InitializeFarm<'info> {
     pub owner: Signer<'info>,
 
     #[account(
-        init,
+        init_if_needed,
         seeds = [b"farm", owner.key().as_ref()],
         bump,
         payer = owner,
@@ -20,8 +20,8 @@ pub struct InitializeFarm<'info> {
     pub farm_token_mint: Account<'info, Mint>,
 
     #[account(
-        init,
-        seeds = [b"farm-signer", farm.key().as_ref()],
+        init_if_needed,
+        seeds = [b"farm", farm.key().as_ref()],
         bump,
         payer = owner,
         space = 8
@@ -30,8 +30,8 @@ pub struct InitializeFarm<'info> {
     pub farm_signer: UncheckedAccount<'info>,
 
     #[account(
-        init,
-        token::mint = farm_token_mint,
+        init_if_needed,
+        token::mint = payment_mint,
         token::authority = farm_signer,
         seeds = [b"payment-vault", farm.key().as_ref()],
         bump,
@@ -39,8 +39,10 @@ pub struct InitializeFarm<'info> {
     )]
     pub farm_payment_vault: Account<'info, TokenAccount>,
 
+    pub payment_mint: Account<'info, Mint>,
+
     #[account(
-        init,
+        init_if_needed,
         token::mint = farm_token_mint,
         token::authority = farm_signer,
         seeds = [b"revenue-vault", farm.key().as_ref()],
@@ -54,21 +56,26 @@ pub struct InitializeFarm<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-pub fn initialize_farm(ctx: Context<InitializeFarm>, total_shares: u64) -> Result<()> {
+pub fn initialize_farm(
+    ctx: Context<InitializeFarm>,
+    total_shares: u64,
+    price_per_share: u64,
+) -> Result<()> {
     let farm = &mut ctx.accounts.farm;
     farm.owner = *ctx.accounts.owner.key;
     farm.farm_token_mint = ctx.accounts.farm_token_mint.key();
 
+    farm.payment_mint = ctx.accounts.payment_mint.key();
     farm.farm_payment_vault = ctx.accounts.farm_payment_vault.key();
     farm.farm_revenue_vault = ctx.accounts.farm_revenue_vault.key();
 
     farm.total_shares = total_shares;
     farm.minted_shares = 0;
+    farm.price_per_share = price_per_share;
 
     farm.account_revenue_per_share = 0;
     farm.bump = ctx.bumps.farm;
     farm.signer_bump = ctx.bumps.farm_signer;
-
 
     Ok(())
 }

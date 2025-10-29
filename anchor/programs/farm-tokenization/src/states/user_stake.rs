@@ -3,11 +3,11 @@ use anchor_lang::prelude::*;
 #[account]
 #[derive(InitSpace)]
 pub struct UserStake {
-    is_initialized: bool,
-    owner: Pubkey,
-    farm: Pubkey,
-    quantity: u32,
-    pay_amount: u64,
-    debt_claimed: u128,
-    bump: u8,
+    pub is_initialized: bool,
+    pub owner: Pubkey,
+    pub farm: Pubkey,
+    pub quantity: u32,
+    pub pay_amount: u64,
+    pub debt_claimed: u128,
+    pub bump: u8,
 }
