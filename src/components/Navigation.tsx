@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sprout, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Link from 'next/link';
+import { WalletButton } from './providers/solana-provider';
 
 const Navigation = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -29,12 +30,13 @@ const Navigation = () => {
                     </Link>
 
                     <div className="hidden md:flex items-center gap-4">
-                        <Button variant="ghost" className="text-muted-foreground hover:text-primary">
-                            Connect Wallet
-                        </Button>
-                        <Button className="bg-gradient-hero text-primary-foreground hover:opacity-90">
-                            Launch App
-                        </Button>
+                        <WalletButton />
+
+                        <Link href='/create-farm'>
+                            <Button className="bg-gradient-hero text-primary-foreground hover:opacity-90">
+                                Create Farm
+                            </Button>
+                        </Link>
                     </div>
 
                     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -56,9 +58,7 @@ const Navigation = () => {
                                     </a>
                                 ))}
                                 <div className="flex flex-col gap-3 mt-4">
-                                    <Button variant="outline" className="w-full">
-                                        Connect Wallet
-                                    </Button>
+                                    <WalletButton className='bg-red-700' />
                                     <Button className="w-full bg-gradient-hero text-primary-foreground">
                                         Launch App
                                     </Button>

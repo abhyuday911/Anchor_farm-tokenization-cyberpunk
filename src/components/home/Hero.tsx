@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sprout } from "lucide-react";
 import Image from 'next/image';
+import Link from 'next/link';
 import heroBg from "public/assets/hero-bg.jpg";
 
 const Hero = () => {
@@ -32,19 +33,21 @@ const Hero = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:0.3s]">
-                    <Button
-                        size="lg"
-                        className="bg-gradient-hero text-primary-foreground hover:opacity-90 transition-all duration-300 glow-primary group"
-                    >
-                        Launch App
-                        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Button>
+                    <Link href='/create-farm'>
+                        <Button
+                            size="lg"
+                            className="bg-gradient-hero text-primary-foreground hover:opacity-90 transition-all duration-300 glow-primary group"
+                        >
+                            Create Farm
+                            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                    </Link>
                     <Button
                         size="lg"
                         variant="outline"
                         className="border-primary/50 text-primary hover:bg-primary/10"
                     >
-                        Learn More
+                        Invest In Farm Tokens
                     </Button>
                 </div>
 

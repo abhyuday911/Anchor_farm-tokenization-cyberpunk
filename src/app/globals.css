@@ -143,11 +143,7 @@
     background: var(--gradient-card);
   }
 
-  /* .glow-primary {
-    box-shadow: var(--glow-primary);
-  } */
-
-   .glow-primary:hover {
+  .glow-primary:hover {
     box-shadow: var(--glow-primary);
   }
 
@@ -186,4 +182,14 @@
       box-shadow: 0 0 40px hsl(142 76% 45% / 0.4);
     }
   }
+}
+
+/* button.wallet-adapter-button-trigger {
+  @apply bg-secondary rounded-md;
+} */
+
+.wallet-adapter-button-trigger {
+  height: auto !important;
+  @apply !bg-transparent !shadow-xs hover:!bg-accent !text-muted-foreground hover:!text-primary !border-input/10 dark:hover:!bg-primary/20;
+  @apply !px-2 !py-[6px] !rounded-md !text-sm !font-semibold !shadow-sm !transition-all;
 }
