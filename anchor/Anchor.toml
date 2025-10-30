@@ -7,7 +7,7 @@ skip-lint = false
 
 [programs.localnet]
 counter = "Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe"
-farm_tokenization = "GwvQ53QTu1xz3XXYfG5m5jEqwhMBvVBudPS8TUuFYnhT"
+farm_tokenization = "Ard8wQpNdajcUvc9amhbxqdPHt6rDotjDWyt4NTTCkmT"
 
 [registry]
 url = "https://api.apr.dev"

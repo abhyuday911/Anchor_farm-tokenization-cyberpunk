@@ -1,6 +1,6 @@
 #![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
-declare_id!("GwvQ53QTu1xz3XXYfG5m5jEqwhMBvVBudPS8TUuFYnhT");
+declare_id!("Ard8wQpNdajcUvc9amhbxqdPHt6rDotjDWyt4NTTCkmT");
 
 pub mod instructions;
 pub use instructions::*;
