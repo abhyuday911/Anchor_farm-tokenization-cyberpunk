@@ -5,6 +5,7 @@ import {
   SystemProgram,
 } from "@solana/web3.js";
 import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
   createAccount,
   createMint,
   mintTo,
@@ -22,14 +23,13 @@ describe("Farm lifecycle", () => {
 
   let farmPda: PublicKey;
   let farmSignerPda: PublicKey;
-  let farmTokenMint: PublicKey;
+  let farmTokenMintPda: PublicKey;
   let farmPaymentVault: PublicKey;
   let farmRevenueVault: PublicKey;
   let paymentMint: PublicKey;
 
   let buyer: anchor.web3.Keypair;
   let buyerPaymentAta: PublicKey;
-  let investorFarmTokenAta: PublicKey;
 
   beforeAll(async () => {
     [farmPda] = PublicKey.findProgramAddressSync(
@@ -42,6 +42,10 @@ describe("Farm lifecycle", () => {
       program.programId
     );
 
+    [farmTokenMintPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("farm_token_mint"), farmPda.toBuffer()], program.programId
+    );
+
     [farmPaymentVault] = PublicKey.findProgramAddressSync(
       [Buffer.from("payment-vault"), farmPda.toBuffer()],
       program.programId
@@ -52,13 +56,6 @@ describe("Farm lifecycle", () => {
       program.programId
     );
 
-    farmTokenMint = await createMint(
-      provider.connection,
-      (payer as anchor.Wallet).payer,
-      farmSignerPda,
-      null,
-      6
-    );
 
     paymentMint = await createMint(
       provider.connection,
@@ -80,13 +77,6 @@ describe("Farm lifecycle", () => {
       buyer.publicKey
     );
 
-    investorFarmTokenAta = await createAccount(
-      provider.connection,
-      (payer as anchor.Wallet).payer,
-      farmTokenMint,
-      buyer.publicKey
-    );
-
     await mintTo(
       provider.connection,
       (payer as anchor.Wallet).payer,
@@ -103,11 +93,11 @@ describe("Farm lifecycle", () => {
       .accounts({
         owner: farmOwnerPubKey,
         farm: farmPda,
-        farmTokenMint,
         farmSigner: farmSignerPda,
         paymentMint,
         farmPaymentVault,
         farmRevenueVault,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
@@ -119,6 +109,8 @@ describe("Farm lifecycle", () => {
     expect(farmAccount.owner.toString()).toBe(farmOwnerPubKey.toString());
     expect(farmAccount.totalShares.toNumber()).toBe(1_000_000);
     expect(farmAccount.pricePerShare.toNumber()).toBe(100);
+
+
   });
 
   it("buys shares", async () => {
@@ -130,33 +122,28 @@ describe("Farm lifecycle", () => {
       program.programId
     );
 
-    try {
-      await program.methods
-        .shareBuying(amount, payAmount)
-        .accounts({
-          farm: farmPda,
-          farmSigner: farmSignerPda,
-          payer: buyer.publicKey,
-          payerAta: buyerPaymentAta,
-          farmPaymentVault,
-          farmTokenMint: farmTokenMint,
-          investorFarmTokenAta,
-          user: userPda,
-          systemProgram: SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-        })
-        .signers([buyer])
-        .rpc();
+    await program.methods
+      .shareBuying(amount, payAmount)
+      .accounts({
+        farm: farmPda,
+        farmSigner: farmSignerPda,
+        payer: buyer.publicKey,
+        payerAta: buyerPaymentAta,
+        farmPaymentVault,
+        farmTokenMint: farmTokenMintPda,
+        user: userPda,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([buyer])
+      .rpc();
 
-      const farmAccount = await program.account.farm.fetch(farmPda);
-      expect(farmAccount.mintedShares.toNumber()).toBe(500);
+    const farmAccount = await program.account.farm.fetch(farmPda);
+    expect(farmAccount.mintedShares.toNumber()).toBe(500);
 
-      const userStake = await program.account.userStake.fetch(userPda);
-      expect(userStake.owner.toBase58()).toBe(buyer.publicKey.toBase58());
-      expect(userStake.quantity).toBe(500);
-    } catch (error) {
-      console.error(error)
-    }
+    const userStake = await program.account.userStake.fetch(userPda);
+    expect(userStake.owner.toBase58()).toBe(buyer.publicKey.toBase58());
+    expect(userStake.quantity).toBe(500);
   });
 
   it("fail if amount == 0", async () => {
@@ -168,8 +155,7 @@ describe("Farm lifecycle", () => {
         payer: buyer.publicKey,
         payerAta: buyerPaymentAta,
         farmPaymentVault,
-        farmTokenMint,
-        investorFarmTokenAta,
+        farmTokenMint: farmTokenMintPda,
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
       })

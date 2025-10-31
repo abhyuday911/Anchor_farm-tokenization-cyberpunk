@@ -1,5 +1,8 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{Mint, Token, TokenAccount},
+};
 
 pub use crate::states::Farm;
 #[derive(Accounts)]
@@ -16,7 +19,15 @@ pub struct InitializeFarm<'info> {
     )]
     pub farm: Account<'info, Farm>,
 
-    // frontend-created mint
+    #[account(
+        init_if_needed,
+        payer = owner,
+        mint::decimals = 6,
+        mint::authority = farm_signer.key(),
+        mint::freeze_authority = farm_signer.key(),
+        seeds = [b"farm_token_mint",farm.key().as_ref()],
+        bump
+    )]
     pub farm_token_mint: Account<'info, Mint>,
 
     #[account(
@@ -24,7 +35,7 @@ pub struct InitializeFarm<'info> {
         seeds = [b"farm", farm.key().as_ref()],
         bump,
         payer = owner,
-        space = 8
+        space = 8,
     )]
     /// CHECK: PDA signer
     pub farm_signer: UncheckedAccount<'info>,
@@ -51,6 +62,7 @@ pub struct InitializeFarm<'info> {
     )]
     pub farm_revenue_vault: Account<'info, TokenAccount>,
 
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,

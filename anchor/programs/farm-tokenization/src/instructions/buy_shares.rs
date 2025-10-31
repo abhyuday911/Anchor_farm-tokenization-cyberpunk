@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, transfer, Mint, MintTo, Token, TokenAccount, Transfer};
+use anchor_spl::{associated_token::AssociatedToken, token::{self, Mint, MintTo, Token, TokenAccount, Transfer, transfer}};
 
 pub use crate::UserStake;
 use crate::{error::ErrorCode, Farm};
@@ -10,6 +10,7 @@ pub struct BuyShares<'info> {
     pub farm: Account<'info, Farm>,
 
     /// CHECK: PDA Signer
+    #[account()]
     pub farm_signer: UncheckedAccount<'info>,
 
     #[account(mut)]
@@ -22,10 +23,19 @@ pub struct BuyShares<'info> {
     #[account(mut)]
     pub farm_payment_vault: Account<'info, TokenAccount>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"farm_token_mint", farm.key().as_ref()],
+        bump
+    )]
     pub farm_token_mint: Account<'info, Mint>,
 
-    #[account(mut)]
+    #[account(
+        init_if_needed,
+        payer = payer,
+        associated_token::mint = farm_token_mint,
+        associated_token::authority = payer,
+    )]
     pub investor_farm_token_ata: Account<'info, TokenAccount>,
 
     #[account(
@@ -36,6 +46,7 @@ pub struct BuyShares<'info> {
         space= 8 + UserStake::INIT_SPACE
     )]
     pub user: Account<'info, UserStake>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
 }
