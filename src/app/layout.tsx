@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import React from 'react'
-import { ThemeProvider } from '@/components/providers/theme-provider'
-import { SolanaProvider } from '@/components/providers/solana-provider'
+
 
 export const metadata: Metadata = {
   title: 'Farm Tokenization',
@@ -12,18 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SolanaProvider>
-            {children}
-          </SolanaProvider>
-        </ThemeProvider>
-      </body>
+      <body className={`antialiased`}>{children}</body>
     </html>
   )
 }
