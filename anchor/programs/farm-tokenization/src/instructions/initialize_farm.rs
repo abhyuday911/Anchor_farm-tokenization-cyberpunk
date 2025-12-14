@@ -70,12 +70,14 @@ pub struct InitializeFarm<'info> {
 
 pub fn initialize_farm(
     ctx: Context<InitializeFarm>,
+    name: String,
     total_shares: u64,
     price_per_share: u64,
 ) -> Result<()> {
     let farm = &mut ctx.accounts.farm;
     farm.owner = *ctx.accounts.owner.key;
     farm.farm_token_mint = ctx.accounts.farm_token_mint.key();
+    farm.name = name;
 
     farm.payment_mint = ctx.accounts.payment_mint.key();
     farm.farm_payment_vault = ctx.accounts.farm_payment_vault.key();

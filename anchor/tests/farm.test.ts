@@ -89,7 +89,7 @@ describe("Farm lifecycle", () => {
 
   it("initializes the Farm", async () => {
     await program.methods
-      .farmInitialize(new anchor.BN(1_000_000), new anchor.BN(100))
+      .farmInitialize("Ramesh Farm",new anchor.BN(1_000_000), new anchor.BN(100))
       .accounts({
         owner: farmOwnerPubKey,
         farm: farmPda,
